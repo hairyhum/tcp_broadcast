@@ -14,13 +14,16 @@ Quick start:
 ### Make tasks:
 
 `make compile` - compile application with rebar
+
 `make console` - start application in erlang shell
+
 `make background` - start application without shell
+
 `make test` - run tests (eunit and common test)
 
 Application structure:
 
-
+```
 tcp_broadcast_app
 |
 --- tcp_broadcast_sup
@@ -34,6 +37,6 @@ tcp_broadcast_app
         --- tcp_handler
         |
         --- ...
-
+```
 
 
