@@ -3,14 +3,19 @@ APP_NAME = tcp_broadcast
 PWD=`pwd`
 export PATH := /opt/bin:$(PATH)
 
+all: compile console
+
 compile:
 	./rebar compile
 
 clean:
 	./rebar clean
 
+background:
+	erl -noshell -boot start_sasl -pa ebin -s tcp_broadcast_app start
+
 console:
-	erl  -boot start_sasl -pa ebin -s tcp_broadcast_app start
+	erl -boot start_sasl -pa ebin -s tcp_broadcast_app start
 
 test: compile
 	./rebar eunit
