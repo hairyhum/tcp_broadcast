@@ -1,0 +1,12 @@
+{application, tcp_broadcast,
+ [
+  {description, ""},
+  {vsn, "1"},
+  {registered, []},
+  {applications, [
+                  kernel,
+                  stdlib
+                 ]},
+  {mod, { tcp_broadcast_app, []}},
+  {env, [{port, 8080}]}
+ ]}.
