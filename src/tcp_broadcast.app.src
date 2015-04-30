@@ -8,5 +8,5 @@
                   stdlib
                  ]},
   {mod, { tcp_broadcast_app, []}},
-  {env, [{port, 8080}]}
+  {env, [{port, 6667}]}
  ]}.

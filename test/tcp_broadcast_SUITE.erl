@@ -33,9 +33,10 @@ test_tcp_broadcast() ->
     [{userdata,[{doc,"Testing the tcp_broadcast application."}]}].
 
 test_tcp_broadcast(_Config) ->
-    {ok, Listener} = gen_tcp:connect("localhost", 8080, [{active, false}, binary]),
-    {ok, Listener1} = gen_tcp:connect("localhost", 8080, [{active, false}, binary]),
-    {ok, Sender} = gen_tcp:connect("localhost", 8080, [{active, false}, binary]),
+    {ok, Port} = application:get_env(tcp_broadcast, port),
+    {ok, Listener} = gen_tcp:connect("localhost", Port, [{active, false}, binary]),
+    {ok, Listener1} = gen_tcp:connect("localhost", Port, [{active, false}, binary]),
+    {ok, Sender} = gen_tcp:connect("localhost", Port, [{active, false}, binary]),
     
     ok = gen_tcp:send(Sender, <<"Foo\n">>),
     {ok, <<"Foo\n">>} = gen_tcp:recv(Listener, 0),
@@ -45,9 +46,10 @@ test_tcp_broadcast_sequences() ->
     [{userdata,[{doc,"Testing the tcp_broadcast with skipping sequences."}]}].
 
 test_tcp_broadcast_sequences(_Config) ->
-    {ok, Listener} = gen_tcp:connect("localhost", 8080, [{active, false}, binary]),
-    {ok, Listener1} = gen_tcp:connect("localhost", 8080, [{active, false}, binary]),
-    {ok, Sender} = gen_tcp:connect("localhost", 8080, [{active, false}, binary]),
+    {ok, Port} = application:get_env(tcp_broadcast, port),
+    {ok, Listener} = gen_tcp:connect("localhost", Port, [{active, false}, binary]),
+    {ok, Listener1} = gen_tcp:connect("localhost", Port, [{active, false}, binary]),
+    {ok, Sender} = gen_tcp:connect("localhost", Port, [{active, false}, binary]),
     
     ok = gen_tcp:send(Sender, <<"Foo\n\\Bar">>),
     {ok, <<"Foo\n">>} = gen_tcp:recv(Listener, 0),

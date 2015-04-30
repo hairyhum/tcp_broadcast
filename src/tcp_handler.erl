@@ -1,6 +1,8 @@
 -module(tcp_handler).
 -behaviour(gen_server).
 
+-define(ESCAPE_CHARACTER, $\\).
+
 -export([start_link/1]).
 
 -export([init/1, handle_call/3, handle_cast/2, handle_info/2, terminate/2, code_change/3]).
@@ -69,7 +71,15 @@ parse_sequence(<<>>, Sending, Sequence) ->
   {Sending, Sequence};
 parse_sequence(<<Char:1/binary, Data/binary>>, Sending, Sequence) ->
   NewSequence = case terminated_sequence(Sequence) of
-    true -> Char;
+    true -> 
+      case escaped_sequence(Sequence) of
+        true ->
+          % Here we can do something with accumulated escaped sequence.
+          % Lets write it to log file.
+          file:write_file("escaped.log", Sequence, [append]);
+        false -> ok
+      end,
+      Char;
     false -> <<Sequence/binary, Char/binary>>
   end,
   NewSending = case escaped_sequence(NewSequence) of
@@ -84,24 +94,24 @@ terminated_sequence(Sequence) ->
    binary:last(Sequence) == $\n.
 
 -spec escaped_sequence(binary()) -> boolean().
-escaped_sequence(<<$\\, _/binary>>) -> true;
+escaped_sequence(<<?ESCAPE_CHARACTER, _/binary>>) -> true;
 escaped_sequence(_) -> false. 
 
 -ifdef(TEST).
 -include_lib("eunit/include/eunit.hrl").
 
 parse_sequence_test() ->
-  ?assertMatch({<<"first sequence\nsecond sequence\nfouth \\sequence">>,<<"fouth \\sequence">>},
-    parse_sequence(<<"first sequence\nsecond sequence\n\\third sequence escaped\nfouth \\sequence">>, <<>>, <<"foo">>)),
+  ?assertMatch({<<"first sequence\nsecond sequence\nfouth ",?ESCAPE_CHARACTER,"sequence">>,<<"fouth ",?ESCAPE_CHARACTER,"sequence">>},
+    parse_sequence(<<"first sequence\nsecond sequence\n",?ESCAPE_CHARACTER,"third sequence escaped\nfouth ",?ESCAPE_CHARACTER,"sequence">>, <<>>, <<"foo">>)),
   ?assertMatch({<<"continues">>,<<"unterminated sequence continues">>},
     parse_sequence(<<"continues">>, <<>>, <<"unterminated sequence ">>)),
   ?assertMatch({<<"continues and terminates\n">>,<<"unterminated sequence continues and terminates\n">>},
     parse_sequence(<<"continues and terminates\n">>, <<>>, <<"unterminated sequence ">>)),
   ?assertMatch({<<"start a new sequence">>,<<"start a new sequence">>},
     parse_sequence(<<"start a new sequence">>, <<>>, <<"terminated sequence\n">>)),
-  ?assertMatch({<<"">>,<<"\\ escaped sequence skipped">>},
-    parse_sequence(<<"skipped">>, <<>>, <<"\\ escaped sequence ">>)),
+  ?assertMatch({<<"">>,<<?ESCAPE_CHARACTER," escaped sequence skipped">>},
+    parse_sequence(<<"skipped">>, <<>>, <<?ESCAPE_CHARACTER," escaped sequence ">>)),
   ?assertMatch({<<"skipped">>,<<"skipped">>},
-    parse_sequence(<<"sequence\nskipped">>, <<>>, <<"\\ escaped terminated ">>)).
+    parse_sequence(<<"sequence\nskipped">>, <<>>, <<?ESCAPE_CHARACTER," escaped terminated ">>)).
 
 -endif.

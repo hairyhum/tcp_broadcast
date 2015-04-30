@@ -12,6 +12,10 @@ clean:
 console:
 	erl  -boot start_sasl -pa ebin -s tcp_broadcast_app start
 
+test: compile
+	./rebar eunit
+	./rebar ct
+
 build_plt:
 	ERL_LIBS=$(PWD)/deps dialyzer --build_plt --output_plt $(APP_NAME).plt --apps erts kernel stdlib crypto public_key ssl edoc -r deps
 analyze: compile 
